@@ -26,23 +26,26 @@
 #include <FPS_GT511C1R.h>
 #include <Bounce2.h>
 
-#define SOFT_SERIAL_IN          8
-#define SOFT_SERIAL_OUT         9
-#define BTN_IN                  7
-#define BTN_LED                 6
-#define RELAY_SW                3
+#define SOFT_SERIAL_IN          8       // RX pin
+#define SOFT_SERIAL_OUT         9       // TX pin
+#define BTN_IN                  7       // Button in pin
+#define BTN_LED                 6       // Button led out pin
+#define RELAY_SW                3       // Relay out pin
 
-#define LED_CLOCK               500
-#define RELAY_PULSE_DURATION    500
-#define AUTH_REQ_TIMEOUT        10000
-#define AUTH_TIMEOUT            30000
-#define DEBOUNCE_TIME           5
+#define LED_CLOCK               500     // [ms]
+#define RELAY_PULSE_DURATION    500     // [ms]
+#define AUTH_REQ_TIMEOUT        10000   // [ms]
+#define AUTH_TIMEOUT            30000   // [ms]
+#define DEBOUNCE_TIME           5       // [ms]
 
-#define MAX_AUTH_ID             4
+#define MAX_SUPPORTED_ID        21      // Maximum fingerprints number
+                                        // supported by the sensor + 1
+#define MAX_AUTH_ID             4       // Maximum enrolled and valid IDs on the sensor
 
 #define STEP_SLEEP              0
 #define STEP_WAIT               5
 #define STEP_WAIT_AUTH          10
+#define STEP_WAIT_AUTH_2        11
 #define STEP_AUTH               15
 
 // Fingerprint scanner sensor
@@ -59,12 +62,11 @@ unsigned long pulseOpen = 0;
 // Starting step
 unsigned short int step = STEP_SLEEP;
 
-bool relaySw = false;
 bool ledState = false;
 bool autReq = false;
 bool autGranted = false;
 bool btnEdgePos = false;
-bool timeout = true;
+int id = MAX_SUPPORTED_ID;
 
 // Put the micro to sleep
 void system_sleep() {
@@ -78,7 +80,6 @@ void system_sleep() {
 
 // Reset internal variables
 void reset() {
-  timeout = true;
   ledState = false;
   autReq = false;
   autGranted = false;
@@ -104,6 +105,7 @@ void setup() {
   // Serial.begin(9600);
   // fps.UseSerialDebug = true;
   fps.Open();
+  reset();
 
   // Disable ADC to save power
   ADCSRA = 0;
@@ -128,13 +130,12 @@ void loop() {
 
   switch (step) {
 
-    case STEP_SLEEP:
-      // System sleep wating for interrupt in PCINT3 (pin 7)
+    case STEP_SLEEP: // System sleep wating for interrupt in PCINT3 (pin 7)
       system_sleep();
       step = STEP_WAIT;
       break;
 
-    case STEP_WAIT:
+    case STEP_WAIT: // Wait for button positive edge
       if (btnEdgePos) {
         autReq = true;
         fps.SetLED(true);
@@ -146,7 +147,7 @@ void loop() {
       }
       break;
 
-    case STEP_WAIT_AUTH:
+    case STEP_WAIT_AUTH:  // Wait for finger on the sensor, or timeout
       if (millis() - clockStart >= LED_CLOCK) {
         clockStart = millis();
         ledState = !ledState;
@@ -156,28 +157,37 @@ void loop() {
       if (millis() - start >= AUTH_REQ_TIMEOUT) {
         reset();
         step = STEP_SLEEP;
+
+      } else if (fps.IsPressFinger()) {
+        ledState = true;
+        digitalWrite(BTN_LED, ledState);
+        step = STEP_WAIT_AUTH_2;
       }
+      break;
 
-      // Identify fingerprint
-      if (fps.IsPressFinger()) {
-        fps.CaptureFinger(false);
-        int id = fps.Identify1_N();
-        if (id <= MAX_AUTH_ID) {
-          autGranted = true;
-          pulseOpen = millis();
+    case STEP_WAIT_AUTH_2: // Identify fingerprint
+      fps.CaptureFinger(false);
+      id = fps.Identify1_N();
+      if (id <= MAX_AUTH_ID) {
+        // Fingerprint identified: authorization granted
+        autGranted = true;
+        pulseOpen = millis();
 
-          fps.SetLED(false);
-          digitalWrite(RELAY_SW, HIGH);
-          digitalWrite(BTN_LED, HIGH);
+        fps.SetLED(false);
+        digitalWrite(RELAY_SW, HIGH);
+        digitalWrite(BTN_LED, HIGH);
 
-          startAuth = millis();
-          step = STEP_AUTH;
-        }
+        startAuth = millis();
+        step = STEP_AUTH;
+
+      } else {
+        // Fingerprint not identified
+        clockStart = millis();
+        step = STEP_WAIT_AUTH;
       }
       break;
 
     case STEP_AUTH:
-
       if (millis() - startAuth >= AUTH_TIMEOUT) {
         reset();
         step = STEP_SLEEP;
@@ -196,8 +206,8 @@ void loop() {
       break;
   }
 
-  // Serial.print("STEP = ");
-  // Serial.println(step);
+   // Serial.print("STEP = ");
+   // Serial.println(step);
 
 } // End of loop
 
