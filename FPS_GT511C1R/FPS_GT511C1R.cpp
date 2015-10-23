@@ -484,7 +484,7 @@ int FPS_GT511C1R::Enroll3()
 // Return: true if finger pressed, false if not
 bool FPS_GT511C1R::IsPressFinger()
 {
-	// if (UseSerialDebug) Serial.println("FPS - IsPressFinger");
+	if (UseSerialDebug) Serial.println("FPS - IsPressFinger");
 	Command_Packet* cp = new Command_Packet();
 	cp->Command = Command_Packet::Commands::IsPressFinger;
 	byte* packetbytes = cp->GetPacketBytes();
@@ -573,7 +573,7 @@ int FPS_GT511C1R::Verify1_1(int id)
 //	200: Failed to find the fingerprint in the database
 int FPS_GT511C1R::Identify1_N()
 {
-	// if (UseSerialDebug) Serial.println("FPS - Identify1_N");
+	if (UseSerialDebug) Serial.println("FPS - Identify1_N");
 	Command_Packet* cp = new Command_Packet();
 	cp->Command = Command_Packet::Commands::Identify1_N;
 	byte* packetbytes = cp->GetPacketBytes();
@@ -593,7 +593,7 @@ int FPS_GT511C1R::Identify1_N()
 // Returns: True if ok, false if no finger pressed
 bool FPS_GT511C1R::CaptureFinger(bool highquality)
 {
-	//  (UseSerialDebug) Serial.println("FPS - CaptureFinger");
+	if (UseSerialDebug) Serial.println("FPS - CaptureFinger");
 	Command_Packet* cp = new Command_Packet();
 	cp->Command = Command_Packet::Commands::CaptureFinger;
 	if (highquality)
@@ -714,9 +714,9 @@ void FPS_GT511C1R::SendCommand(byte cmd[], int length)
 	_serial.write(cmd, length);
 	if (UseSerialDebug)
 	{
-		// Serial.print("FPS - SEND: ");
+		Serial.print("FPS - SEND: ");
 		SendToSerial(cmd, length);
-		// Serial.println();
+		Serial.println();
 	}
 };
 
@@ -745,10 +745,10 @@ Response_Packet* FPS_GT511C1R::GetResponse()
 	delete resp;
 	if (UseSerialDebug) 
 	{
-		// Serial.print("FPS - RECV: ");
+		Serial.print("FPS - RECV: ");
 		SendToSerial(rp->RawBytes, 12);
-		// Serial.println();
-		// Serial.println();
+		Serial.println();
+		Serial.println();
 	}
 	return rp;
 };
@@ -757,13 +757,13 @@ Response_Packet* FPS_GT511C1R::GetResponse()
 void FPS_GT511C1R::SendToSerial(byte data[], int length)
 {
   boolean first=true;
-  // Serial.print("\"");
+  Serial.print("\"");
   for(int i=0; i<length; i++)
   {
-    // if (first) first=false; else Serial.print(" ");
+    if (first) first=false; else Serial.print(" ");
     serialPrintHex(data[i]);
   }
-  // Serial.print("\"");
+  Serial.print("\"");
 }
 
 // sends a byte to the serial debugger in the hex format we want EX "0F"
@@ -771,7 +771,7 @@ void FPS_GT511C1R::serialPrintHex(byte data)
 {
   char tmp[16];
   sprintf(tmp, "%.2X",data); 
-  // Serial.print(tmp);
+  Serial.print(tmp);
 }
 #pragma endregion
 
