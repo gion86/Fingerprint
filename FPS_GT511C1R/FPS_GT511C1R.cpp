@@ -236,7 +236,7 @@ FPS_GT511C1R::~FPS_GT511C1R()
 //Initialises the device and gets ready for commands
 void FPS_GT511C1R::Open()
 {
-	// if (UseSerialDebug) Serial.println("FPS - Open");
+	if (UseSerialDebug) Serial.println("FPS - Open");
 	Command_Packet* cp = new Command_Packet();
 	cp->Command = Command_Packet::Commands::Open;
 	cp->Parameter[0] = 0x00;
@@ -277,12 +277,12 @@ bool FPS_GT511C1R::SetLED(bool on)
 	cp->Command = Command_Packet::Commands::CmosLed;
 	if (on)
 	{
-		// if (UseSerialDebug) Serial.println("FPS - LED on");
+	    if (UseSerialDebug) Serial.println("FPS - LED on");
 		cp->Parameter[0] = 0x01;
 	}
 	else
 	{
-		// if (UseSerialDebug) Serial.println("FPS - LED off");
+	    if (UseSerialDebug) Serial.println("FPS - LED off");
 		cp->Parameter[0] = 0x00;
 	}
 	cp->Parameter[1] = 0x00;
@@ -593,7 +593,7 @@ int FPS_GT511C1R::Identify1_N()
 // Returns: True if ok, false if no finger pressed
 bool FPS_GT511C1R::CaptureFinger(bool highquality)
 {
-	if (UseSerialDebug) Serial.println("FPS - CaptureFinger");
+//	if (UseSerialDebug) Serial.println("FPS - CaptureFinger");
 	Command_Packet* cp = new Command_Packet();
 	cp->Command = Command_Packet::Commands::CaptureFinger;
 	if (highquality)
@@ -712,12 +712,17 @@ bool FPS_GT511C1R::CaptureFinger(bool highquality)
 void FPS_GT511C1R::SendCommand(byte cmd[], int length)
 {
 	_serial.write(cmd, length);
-	if (UseSerialDebug)
-	{
-		Serial.print("FPS - SEND: ");
-		SendToSerial(cmd, length);
-		Serial.println();
-	}
+    // ############################################################################
+	// # WARNING!!!!!                                                             #
+	// # If the next lines are active, the communication with the sensor is not   #
+	// # opened and nothing works! Still I don't know why!                        #
+	// ############################################################################
+//	if (UseSerialDebug)
+//	{
+//		Serial.print("FPS - SEND: ");
+//		SendToSerial(cmd, length);
+//		Serial.println();
+//	}
 };
 
 // Gets the response to the command from the software serial channel (and waits for it)
@@ -743,7 +748,7 @@ Response_Packet* FPS_GT511C1R::GetResponse()
 	}
 	Response_Packet* rp = new Response_Packet(resp, UseSerialDebug);
 	delete resp;
-	if (UseSerialDebug) 
+	if (UseSerialDebug)
 	{
 		Serial.print("FPS - RECV: ");
 		SendToSerial(rp->RawBytes, 12);
@@ -770,7 +775,7 @@ void FPS_GT511C1R::SendToSerial(byte data[], int length)
 void FPS_GT511C1R::serialPrintHex(byte data)
 {
   char tmp[16];
-  sprintf(tmp, "%.2X",data); 
+  sprintf(tmp, "%.2X",data);
   Serial.print(tmp);
 }
 #pragma endregion

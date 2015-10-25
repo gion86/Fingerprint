@@ -3,7 +3,7 @@
 	<name>FPS_GT511C1R</name>
 	<comment></comment>
 	<projects>
-		<project>SoftwareSerialTiny</project>
+		<project>SoftwareSerial</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
