@@ -102,8 +102,10 @@ void setup() {
   debouncer.attach(BTN_IN);
   debouncer.interval(DEBOUNCE_TIME); // interval in ms
 
-  // Serial.begin(9600);
-  // fps.UseSerialDebug = true;
+#ifdef DEBUG
+  Serial.begin(9600);
+  fps.UseSerialDebug = true;
+#endif
   fps.Open();
   reset();
 
@@ -181,6 +183,7 @@ void loop() {
         step = STEP_AUTH;
 
       } else {
+
         // Fingerprint not identified
         clockStart = millis();
         step = STEP_WAIT_AUTH;
@@ -206,8 +209,10 @@ void loop() {
       break;
   }
 
-   // Serial.print("STEP = ");
-   // Serial.println(step);
+#ifdef DEBUG
+  Serial.print("STEP = ");
+  Serial.println(step);
+#endif
 
 } // End of loop
 

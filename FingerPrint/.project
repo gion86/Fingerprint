@@ -3,9 +3,10 @@
 	<name>FingerPrint</name>
 	<comment></comment>
 	<projects>
-		<project>Attiny84Core</project>
+		<project>AttinyCore</project>
 		<project>Bounce2</project>
 		<project>FPS_GT511C1R</project>
+		<project>SoftwareSerial</project>
 		<project>SoftwareSerialTiny</project>
 	</projects>
 	<buildSpec>
