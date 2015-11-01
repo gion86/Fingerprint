@@ -17,7 +17,7 @@
 
 /*
  * Built for Attiny84 8Mhz, using AVR USBasp programmer.
- * VERSION 0.8.5
+ * VERSION 0.9
  */
 
 #include <Arduino.h>
@@ -97,6 +97,8 @@ void setup() {
   pinMode(RELAY_SW, OUTPUT);
   pinMode(BTN_LED, OUTPUT);
   pinMode(BTN_IN, INPUT_PULLUP);
+  pinMode(SOFT_SERIAL_IN, INPUT_PULLUP);
+  pinMode(SOFT_SERIAL_OUT, OUTPUT);
 
   // After setting up the button, setup the Bounce instance
   debouncer.attach(BTN_IN);

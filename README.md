@@ -1,6 +1,6 @@
 # FINGERPRINT Garage opener 
 ### Fingerprint sensor and relay output to open a garage door upon user authentication  
-**version 0.8.5**
+**version 0.9**
 
 
 This project is made of a single main C++ file, which will be compiled for Atmel AVR 

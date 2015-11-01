@@ -147,7 +147,7 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.packstruct.1687861938" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.cppcompiler.option.optimize.packstruct" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.language.uchar.490910361" name="char is unsigned (-funsigned-char)" superClass="de.innot.avreclipse.cppcompiler.option.language.uchar" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.language.ubitfields.255629378" name="bitfields are unsigned (-funsigned-bitfields)" superClass="de.innot.avreclipse.cppcompiler.option.language.ubitfields" value="false" valueType="boolean"/>
-								<option id="de.innot.avreclipse.cppcompiler.option.def.1898786991" name="Define Syms (-D)" superClass="de.innot.avreclipse.cppcompiler.option.def" valueType="definedSymbols"/>
+								<option id="de.innot.avreclipse.cppcompiler.option.def.1898786991" name="Define Syms (-D)" superClass="de.innot.avreclipse.cppcompiler.option.def"/>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.458458324" superClass="de.innot.avreclipse.cppcompiler.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.linker.winavr.app.debug.759416488" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.debug"/>
@@ -185,7 +185,7 @@
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
-				<externalSettings containerId="FPS_GT511C1R;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+				<externalSettings containerId="FPS_GT511C1R;de.innot.avreclipse.configuration.lib.release.106305086.668022337" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
 					<externalSetting/>
 				</externalSettings>
 				<externalSettings containerId="Bounce2;de.innot.avreclipse.configuration.lib.release.1004168755" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
