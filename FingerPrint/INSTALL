@@ -15,7 +15,7 @@ The instruction I followed for the configuration can be found at
 http://horrorcoding.altervista.org/arduino-development-with-eclipse-a-step-by-step-tutorial-to-the-basic-setup/
 for Windows OS and at http://itpedia.nyu.edu/wiki/Arduino_in_Eclipse for Mac and Linux. 
 These instructions are for Mac but they work pretty straightforward on Linux too.
-On these links you can find some useful instructions and hints on Eclipse 
+At these links you can find some useful instructions and hints on Eclipse 
 configuration and AVR-GCC options:
 
 - http://andybrown.me.uk/wk/2010/10/17/setting-up-eclipse-for-avr-projects/
@@ -27,16 +27,24 @@ your workspace, and it should be already configured.
 DEPENDENCIES
 
 This projects depends on some library which have to be linked against:
-- TODO
+- ATTINY CORE
+- FPS_GT511C1R
+- BOUNCE 2
+- SOFTWARE SERIAL
+
+All those libraries can be found on github. 
+
+The FPS_GT511C1R library has been modified: the strings in the serial output 
+for debugging have been commented out, because they would fill up the flash 
+memory in the small Attiny84. They should be saved in progmem.
 
 You have to compile these libraries and include the respective folders in the 
 Eclipse project configuration (Properties --> C/C++ General --> Path and Symbols - Includes tab).
 You also have to configure the link process (Properties --> C/C++ General --> 
-Path and Symbols - Libraries). Add the 3 libraries mentioned before and the Arduino
-core library, which should be in the Lib subfolder (look in the section COMMON 
-OPTIONS at the bottom of this document for instruction on how to build this library)
+Path and Symbols - Libraries). Add the 4 libraries mentioned before and the ATTiny
+core library (look in the section COMMON OPTIONS at the bottom of this document 
+for instruction on how to build this library)
  
-
 
 *********************************************************************************
 MAKEFILE TODO
@@ -49,53 +57,48 @@ this command should be enough:
 
 sudo apt-get install make avrdude binutils-avr gcc-avr avr-libc gdb-avr
 
+I'm using Archlinux with AVR-gcc v5.2.0 and ARVDUDE v6.1
+
 Look for instruction if you are using other Linux distribution or Windows. 
-The makefile needs some path to find the correct includes and tools:
+The makefile needs some paths to the root directories of each library, to find the 
+correct includes and tools:
 
-ARDUINO_DIR="path to the Arduino SDK toolkit"
-PROJECT_DIR="path to the project root directory"
-DISPLAYGROUP_DIR="path to the DisplayGroup root directory"
-ANALOG_BUT_DIR="path to the AnalogButtons root directory"
+CORE_DIR=path
+PROJECT_DIR=path 
+SOFTWARESERIAL_DIR=path
+FPS_GT511C1R_DIR=path
+BOUNCE2_DIR=path
 
-AVRDUDE="path to the avrdude utility"
+AVRDUDE=path
 
-MCU=atmega328p          #(CPU type, for AVR configuration)
-CPU_SPEED=16000000UL    #(CPU frequency, for AVR configuration)
+MCU=attiny84            #(CPU type, for AVR configuration)
+CPU_SPEED=8000000UL     #(CPU frequency, for AVR configuration)
 
 The makefile uses the same includes and compiler options used by Eclipse.
-
-DEPENDENCIES
-
-This projects depends on some library which has to be linked against:
-- DisplayGroup:  http://display-group.googlecode.com/svn/trunk/display-group
-- AnalogButtonsGeneral: http://display-group.googlecode.com/svn/branches/wireless/AnalogButtons
-- SoftwareSerial: http://arduino.cc/en/Reference/SoftwareSerial
-
-It might be necessary to change some names/path in the makefile to meet the 
-names/path you have for these libraries, especially in the linking process.
-
 
 
 *********************************************************************************
 COMMON OPTIONS
 *********************************************************************************
 
-Here are the options I used to build and run the project on an Arduino UNO board, 
+Here are the options I used to build and run the project on an ATTiny84 micro, 
 for BOTH ECLISPE AND MAKEFILE BUILD.
 
-You have to include some file from the Arduino SDK: 
+You have to add the "new" operator to the build of the ATTiny core: the standard 
+ATTiny core doesn't include the "new" operator definition (header and cpp), that 
+are necessary for the FPS library to compile.
+You can find more information at the official Arduino forum, for example:
 
-- arduino-x.x.x/hardware/arduino/cores/arduino
-- arduino-x.x.x/hardware/arduino/variants/standard
+Topic: Using new operator to allocate arrays dynamically
+http://forum.arduino.cc/index.php?topic=43362.0 
 
 Some really useful setting for the AVR-GCC compiler are necessary to reduce the 
 size of the final application, when you link more library together:
 
 - http://andybrown.me.uk/wk/2010/10/24/recommended-avr-gcc-compiler-settings/
 
-In fact you have only few KB of flash memory available on the Arduino AVR CPU 
-(32KB for Arduino Uno), so size optimization matters.
-
+In fact you have only 8 KB of flash memory available on the ATTiny84 CPU,
+so size optimization matters.
 
 
 *********************************************************************************
@@ -104,7 +107,7 @@ BUILD
 
 The building process is done completely by Eclipse IDE, and the generated makefile 
 will also use Avrdude utility at the end of the building to send the binary file 
-to Arduino, if it is connect to the computer.
+to Arduino ISP/Programmer, if it is connect to the computer.
 The new makefile in the active build configuration (in your project path) should 
 be created by Eclipse during configuration. So just build the project as you would 
 do for any other C++ project.
