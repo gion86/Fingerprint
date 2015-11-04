@@ -17,7 +17,7 @@
 
 /*
  * Built for Attiny84 8Mhz, using AVR USBasp programmer.
- * VERSION 0.9
+ * VERSION 0.9.1
  */
 
 #include <Arduino.h>
@@ -38,8 +38,8 @@
 #define AUTH_TIMEOUT            30000   // [ms]
 #define DEBOUNCE_TIME           5       // [ms]
 
-#define MAX_SUPPORTED_ID        21      // Maximum fingerprints number
-                                        // supported by the sensor + 1
+#define MAX_SUPPORTED_ID        21      // Maximum fingerprints number supported by
+                                        // the sensor + 1
 #define MAX_AUTH_ID             4       // Maximum enrolled and valid IDs on the sensor
 
 #define STEP_SLEEP              0
@@ -184,9 +184,9 @@ void loop() {
         startAuth = millis();
         step = STEP_AUTH;
 
-      } else {
+      } else if (!fps.IsPressFinger()) {
 
-        // Fingerprint not identified
+        // Finger not pressed
         clockStart = millis();
         step = STEP_WAIT_AUTH;
       }
