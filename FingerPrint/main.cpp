@@ -17,7 +17,7 @@
 
 /*
  * Built for Attiny84 8Mhz, using AVR USBasp programmer.
- * VERSION 0.9.1
+ * VERSION 0.9.5
  */
 
 #include <Arduino.h>
@@ -33,19 +33,19 @@
 #define RELAY_SW                3       // Relay out pin
 
 #define LED_CLOCK               500     // [ms]
+#define LED_FAST_CLOCK          250     // [ms]
 #define RELAY_PULSE_DURATION    500     // [ms]
-#define AUTH_REQ_TIMEOUT        10000   // [ms]
-#define AUTH_TIMEOUT            30000   // [ms]
+#define AUTH_REQ_TIMEOUT        15000   // [ms]
+#define AUTH_TIMEOUT            35000   // [ms]
+#define AUTH_CHECK_DELAY        100     // [ms]
 #define DEBOUNCE_TIME           5       // [ms]
 
-#define MAX_SUPPORTED_ID        21      // Maximum fingerprints number supported by
-                                        // the sensor + 1
-#define MAX_AUTH_ID             4       // Maximum enrolled and valid IDs on the sensor
+#define ID_NOT_VALID            200     // Returned ID when the finger is not recognized
+#define MAX_AUTH_ID             20      // Maximum IDs supported by the sensor
 
 #define STEP_SLEEP              0
 #define STEP_WAIT               5
 #define STEP_WAIT_AUTH          10
-#define STEP_WAIT_AUTH_2        11
 #define STEP_AUTH               15
 
 // Fingerprint scanner sensor
@@ -57,6 +57,7 @@ Bounce debouncer = Bounce();
 unsigned long start = 0;
 unsigned long startAuth = 0;
 unsigned long clockStart = 0;
+unsigned long clockDelay = 0;
 unsigned long pulseOpen = 0;
 
 // Starting step
@@ -66,7 +67,7 @@ bool ledState = false;
 bool autReq = false;
 bool autGranted = false;
 bool btnEdgePos = false;
-int id = MAX_SUPPORTED_ID;
+int id = ID_NOT_VALID;
 
 // Put the micro to sleep
 void system_sleep() {
@@ -134,7 +135,7 @@ void loop() {
 
   switch (step) {
 
-    case STEP_SLEEP: // System sleep wating for interrupt in PCINT3 (pin 7)
+    case STEP_SLEEP: // System sleep waiting for interrupt in PCINT3 (pin 7)
       system_sleep();
       step = STEP_WAIT;
       break;
@@ -146,6 +147,7 @@ void loop() {
 
         start = millis();
         clockStart = millis();
+        clockDelay = millis();
 
         step = STEP_WAIT_AUTH;
       }
@@ -158,37 +160,34 @@ void loop() {
         digitalWrite(BTN_LED, ledState);
       }
 
-      if (millis() - start >= AUTH_REQ_TIMEOUT) {
+      // Delay some ms
+      if (millis() - clockDelay >= AUTH_CHECK_DELAY) {
+        clockDelay = millis();
+
+        if (fps.IsPressFinger()) {
+          ledState = true;
+          digitalWrite(BTN_LED, ledState);
+
+          fps.CaptureFinger(false);
+          id = fps.Identify1_N();
+          if (id <= MAX_AUTH_ID) {
+            // Fingerprint identified: authorization granted
+            autGranted = true;
+            pulseOpen = millis();
+
+            fps.SetLED(false);
+            digitalWrite(RELAY_SW, HIGH);
+            digitalWrite(BTN_LED, HIGH);
+
+            startAuth = millis();
+            step = STEP_AUTH;
+          }
+        }
+      }
+
+      if (millis() - start >= AUTH_REQ_TIMEOUT && !autGranted) {
         reset();
         step = STEP_SLEEP;
-
-      } else if (fps.IsPressFinger()) {
-        ledState = true;
-        digitalWrite(BTN_LED, ledState);
-        step = STEP_WAIT_AUTH_2;
-      }
-      break;
-
-    case STEP_WAIT_AUTH_2: // Identify fingerprint
-      fps.CaptureFinger(false);
-      id = fps.Identify1_N();
-      if (id <= MAX_AUTH_ID) {
-        // Fingerprint identified: authorization granted
-        autGranted = true;
-        pulseOpen = millis();
-
-        fps.SetLED(false);
-        digitalWrite(RELAY_SW, HIGH);
-        digitalWrite(BTN_LED, HIGH);
-
-        startAuth = millis();
-        step = STEP_AUTH;
-
-      } else if (!fps.IsPressFinger()) {
-
-        // Finger not pressed
-        clockStart = millis();
-        step = STEP_WAIT_AUTH;
       }
       break;
 
