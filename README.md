@@ -7,7 +7,7 @@ This project is made of a single main C++ file, which will be compiled for Atmel
 architecture, and control fingerprint sensor (FPS_GT511C1R), with an Attiny84, to drive 
 a relay contact. This will open/close my garage door!
 
-At https://www.dropbox.com/sh/g6jrqbgsk1p1ys4/AAAj7RArj__qhmrbH01BzIL2a?dl=0 you can find:
+The documentation folder contains:
 
 * the bill of material;
 * datasheet of used components;
