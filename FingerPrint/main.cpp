@@ -17,7 +17,7 @@
 
 /*
  * Built for Attiny84 8Mhz, using AVR USBasp programmer.
- * VERSION 0.9.5
+ * VERSION 0.9.6
  */
 
 #include <Arduino.h>
@@ -62,6 +62,7 @@ unsigned long pulseOpen = 0;
 
 // Starting step
 unsigned short int step = STEP_SLEEP;
+unsigned short int oldStep = STEP_SLEEP;
 
 bool ledState = false;
 bool autReq = false;
@@ -107,7 +108,7 @@ void setup() {
 
 #ifdef DEBUG
   Serial.begin(9600);
-  fps.UseSerialDebug = true;
+//  fps.UseSerialDebug = true;
 #endif
   fps.Open();
   reset();
@@ -168,19 +169,20 @@ void loop() {
           ledState = true;
           digitalWrite(BTN_LED, ledState);
 
-          fps.CaptureFinger(false);
-          id = fps.Identify1_N();
-          if (id <= MAX_AUTH_ID) {
-            // Fingerprint identified: authorization granted
-            autGranted = true;
-            pulseOpen = millis();
+          if (fps.CaptureFinger(false)) {
+            id = fps.Identify1_N();
+            if (id <= MAX_AUTH_ID) {
+              // Fingerprint identified: authorization granted
+              autGranted = true;
+              pulseOpen = millis();
 
-            fps.SetLED(false);
-            digitalWrite(RELAY_SW, HIGH);
-            digitalWrite(BTN_LED, HIGH);
+              fps.SetLED(false);
+              digitalWrite(RELAY_SW, HIGH);
+              digitalWrite(BTN_LED, HIGH);
 
-            startAuth = millis();
-            step = STEP_AUTH;
+              startAuth = millis();
+              step = STEP_AUTH;
+            }
           }
         }
       }
@@ -211,8 +213,11 @@ void loop() {
   }
 
 #ifdef DEBUG
-  Serial.print("STEP = ");
-  Serial.println(step);
+  if (step != oldStep) {
+    Serial.print("STEP = ");
+    Serial.println(step);
+    oldStep = step;
+  }
 #endif
 
 } // End of loop
