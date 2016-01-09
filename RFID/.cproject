@@ -41,7 +41,6 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.incpath.111196397" name="Include Paths (-I)" superClass="de.innot.avreclipse.cppcompiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AttinyCore}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FPS_GT511C1R}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Bounce2}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SoftwareSerial}&quot;"/>
 								</option>
@@ -59,7 +58,6 @@
 							<tool command="avr-g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GLDErrorParser" id="de.innot.avreclipse.tool.cpplinker.app.debug.1131763644" name="AVR C++ Linker" superClass="de.innot.avreclipse.tool.cpplinker.app.debug">
 								<option id="de.innot.avreclipse.cpplinker.option.libs.1134490803" name="Libraries (-l)" superClass="de.innot.avreclipse.cpplinker.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="bounce2"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="fps_gt511c1r"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="attinycore"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="softwareserial"/>
 								</option>
@@ -67,7 +65,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AttinyCore/Attiny84}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Bounce2/Attiny84}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SoftwareSerial/Attiny84}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FPS_GT511C1R/Attiny84}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Lib}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.cpplinker.option.otherlinkargs.1186005488" name="Other Arguments" superClass="de.innot.avreclipse.cpplinker.option.otherlinkargs" value="-Wl,-gc-sections " valueType="string"/>

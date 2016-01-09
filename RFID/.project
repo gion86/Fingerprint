@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>FingerPrint</name>
+	<name>RFID</name>
 	<comment></comment>
 	<projects>
 		<project>AttinyCore</project>
 		<project>Bounce2</project>
-		<project>FPS_GT511C1R</project>
 		<project>SoftwareSerial</project>
-		<project>SoftwareSerialTiny</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
