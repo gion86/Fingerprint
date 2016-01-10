@@ -1,5 +1,5 @@
 /*
- *  This file is part of FingerPrint garage opener application.
+ *  This file is part of RFID garage opener application.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 
 /*
  * Built for Attiny84 8Mhz, using AVR USBasp programmer.
- * VERSION 0.9.6
+ * VERSION 0.5.0
  */
 
 #include <Arduino.h>
 #include <avr/sleep.h>
+#include <avr/eeprom.h>
 
-#include <FPS_GT511C1R.h>
+#include <SeeedRFID.h>
 #include <Bounce2.h>
 
 #define SOFT_SERIAL_IN          8       // RX pin
@@ -35,21 +36,19 @@
 #define LED_CLOCK               500     // [ms]
 #define LED_FAST_CLOCK          250     // [ms]
 #define RELAY_PULSE_DURATION    500     // [ms]
-#define AUTH_REQ_TIMEOUT        15000   // [ms]
-#define AUTH_TIMEOUT            35000   // [ms]
-#define AUTH_CHECK_DELAY        100     // [ms]
+#define AUTH_TIMEOUT            30000   // [ms]
 #define DEBOUNCE_TIME           5       // [ms]
 
-#define ID_NOT_VALID            200     // Returned ID when the finger is not recognized
-#define MAX_AUTH_ID             20      // Maximum IDs supported by the sensor
-
-#define STEP_SLEEP              0
-#define STEP_WAIT               5
+#define STEP_START              0
 #define STEP_WAIT_AUTH          10
 #define STEP_AUTH               15
 
-// Fingerprint scanner sensor
-FPS_GT511C1R fps(SOFT_SERIAL_IN, SOFT_SERIAL_OUT); // RX, TX
+#define RFID_CARD_NUMBER        3
+
+byte CARD_DB[RFID_CARD_NUMBER][CARD_TAG_SIZE];
+
+SeeedRFID RFID(SOFT_SERIAL_IN, SOFT_SERIAL_OUT);
+RFIDdata tag;
 
 // Bounce2 instance
 Bounce debouncer = Bounce();
@@ -61,14 +60,13 @@ unsigned long clockDelay = 0;
 unsigned long pulseOpen = 0;
 
 // Starting step
-unsigned short int step = STEP_SLEEP;
-unsigned short int oldStep = STEP_SLEEP;
+unsigned short int step = STEP_START;
+unsigned short int oldStep = STEP_START;
 
 bool ledState = false;
-bool autReq = false;
 bool autGranted = false;
 bool btnEdgePos = false;
-int id = ID_NOT_VALID;
+bool sleep = true;
 
 // Put the micro to sleep
 void system_sleep() {
@@ -77,15 +75,16 @@ void system_sleep() {
   sleep_mode();
 
   // sleeping ...
-  sleep_disable(); // wake up fully
+
+  sleep_disable();
+  // wake up fully
 }
 
 // Reset internal variables
 void reset() {
+  sleep = true;
   ledState = false;
-  autReq = false;
   autGranted = false;
-  fps.SetLED(false);
   digitalWrite(BTN_LED, LOW);
   digitalWrite(RELAY_SW, LOW);
 }
@@ -95,7 +94,6 @@ void reset() {
 // ========================================================
 
 void setup() {
-
   pinMode(RELAY_SW, OUTPUT);
   pinMode(BTN_LED, OUTPUT);
   pinMode(BTN_IN, INPUT_PULLUP);
@@ -108,25 +106,26 @@ void setup() {
 
 #ifdef DEBUG
   Serial.begin(9600);
-//  fps.UseSerialDebug = true;
 #endif
-  fps.Open();
   reset();
 
   // Disable ADC to save power
   ADCSRA = 0;
 
-  PCMSK0 |= (1<<PCINT3);    // pin change mask: listen to portA bit 3
-  GIMSK  |= (1<<PCIE0);     // enable PCINT interrupt
+  PCMSK0 |= _BV(PCINT2);    // Use interrupt PCINT2 (PA3 - D7)
+  GIMSK  |= _BV(PCIE0);     // Enable Pin Change Interrupts
+
+  // Read RFID tag data from EEPROM image in Intel HEX format
+  eeprom_read_block((void *) CARD_DB, (const void *) 0, sizeof(CARD_DB));
 
 } // End of setup
-
 
 // ========================================================
 // |                        LOOP                          |
 // ========================================================
 
 void loop() {
+  byte buf[CARD_TAG_SIZE];
 
   // Update the Bounce instance
   debouncer.update();
@@ -136,68 +135,70 @@ void loop() {
 
   switch (step) {
 
-    case STEP_SLEEP: // System sleep waiting for interrupt in PCINT3 (pin 7)
-      system_sleep();
-      step = STEP_WAIT;
+    case STEP_START:
+      PCMSK0 |= _BV(PCINT2); // Turn on PB2 as interrupt pin
+      step = STEP_WAIT_AUTH;
       break;
 
-    case STEP_WAIT: // Wait for button positive edge
-      if (btnEdgePos) {
-        autReq = true;
-        fps.SetLED(true);
-
-        start = millis();
-        clockStart = millis();
-        clockDelay = millis();
-
-        step = STEP_WAIT_AUTH;
-      }
-      break;
-
-    case STEP_WAIT_AUTH:  // Wait for finger on the sensor, or timeout
-      if (millis() - clockStart >= LED_CLOCK) {
-        clockStart = millis();
-        ledState = !ledState;
-        digitalWrite(BTN_LED, ledState);
+    case STEP_WAIT_AUTH:    // Wait for finger on the sensor, or timeout
+      if (sleep) {          // System sleep waiting for interrupt to PCINT2 (PA3 - D7)
+        system_sleep();
+        sleep = false;
       }
 
-      // Delay some ms
-      if (millis() - clockDelay >= AUTH_CHECK_DELAY) {
-        clockDelay = millis();
+      if (RFID.isAvailable()) {
 
-        if (fps.IsPressFinger()) {
-          ledState = true;
-          digitalWrite(BTN_LED, ledState);
+        if (RFID.cardNumber(buf)) {
 
-          if (fps.CaptureFinger(false)) {
-            id = fps.Identify1_N();
-            if (id <= MAX_AUTH_ID) {
-              // Fingerprint identified: authorization granted
+#ifdef DEBUG
+          Serial.print("RFID card number: ");
+          for (int i = 0; i < CARD_TAG_SIZE; i++) {
+            // Zero padding
+            if (buf[i] < 16) {
+              Serial.print('0');
+            }
+            Serial.print(buf[i], HEX);
+          }
+          Serial.println();
+#endif
+
+          boolean found;
+          for (int i = 0; i < RFID_CARD_NUMBER; i++) {
+            found = true;
+            for (int j = 0; j < CARD_TAG_SIZE; j++) {
+              if (CARD_DB[i][j] != buf[j]) {
+                found = false;
+                break;
+              }
+            }
+
+            if (found) {
+              // RFID tag identified: authorization granted
               autGranted = true;
               pulseOpen = millis();
 
-              fps.SetLED(false);
               digitalWrite(RELAY_SW, HIGH);
               digitalWrite(BTN_LED, HIGH);
 
               startAuth = millis();
               step = STEP_AUTH;
+
+              // Turn off PB2 as interrupt pin: to avoid RFID read
+              // before the system is going to sleep again
+              PCMSK0 &= ~_BV(PCINT2);
+              break;
             }
           }
         }
+        sleep = true;
       }
 
-      if (millis() - start >= AUTH_REQ_TIMEOUT && !autGranted) {
-        reset();
-        step = STEP_SLEEP;
-      }
       break;
 
     case STEP_AUTH:
       if (millis() - startAuth >= AUTH_TIMEOUT) {
         reset();
-        step = STEP_SLEEP;
-
+        step = STEP_START;
       } else if (btnEdgePos) {
         pulseOpen = millis();
         digitalWrite(RELAY_SW, HIGH);
