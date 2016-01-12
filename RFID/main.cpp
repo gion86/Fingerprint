@@ -17,7 +17,7 @@
 
 /*
  * Built for Attiny84 8Mhz, using AVR USBasp programmer.
- * VERSION 0.8.0
+ * VERSION 0.8.5
  */
 
 #include <Arduino.h>
@@ -44,6 +44,15 @@
 #define STEP_AUTH               15
 
 #define RFID_CARD_NUMBER        3
+
+#define SET_RESET_PCINT(s) \
+  if (s) {  \
+    PCMSK0 |= _BV(PCINT2); \
+    GIMSK  |= _BV(PCIE0);  \
+  } else {  \
+    GIMSK  &= ~_BV(PCIE0); \
+    PCMSK0 &= ~_BV(PCINT2);\
+  }
 
 byte CARD_DB[RFID_CARD_NUMBER][CARD_TAG_SIZE];
 
@@ -112,10 +121,11 @@ void setup() {
   // Disable ADC to save power
   ADCSRA = 0;
 
-  PCMSK0 |= _BV(PCINT2);    // Use interrupt PCINT2 (PA3 - D7)
-  GIMSK  |= _BV(PCIE0);     // Enable Pin Change Interrupts
+  // Enable Pin Change Interrupts and use interrupt PCINT2 (PA3 - D7)
+  SET_RESET_PCINT(true);
 
   // Read RFID tag data from EEPROM image in Intel HEX format
+  eeprom_busy_wait();
   eeprom_read_block((void *) CARD_DB, (const void *) 0, sizeof(CARD_DB));
 
 } // End of setup
@@ -136,12 +146,12 @@ void loop() {
   switch (step) {
 
     case STEP_START:
-      PCMSK0 |= _BV(PCINT2); // Turn on PB2 as interrupt pin
+      SET_RESET_PCINT(true);    // Turn on PB2 as interrupt pin
       step = STEP_WAIT_AUTH;
       break;
 
-    case STEP_WAIT_AUTH:    // Wait for finger on the sensor, or timeout
-      if (sleep) {          // System sleep waiting for interrupt to PCINT2 (PA3 - D7)
+    case STEP_WAIT_AUTH:        // Wait for finger on the sensor, or timeout
+      if (sleep) {              // System sleep waiting for interrupt to PCINT2 (PA3 - D7)
         system_sleep();
         sleep = false;
       }
@@ -185,7 +195,7 @@ void loop() {
 
               // Turn off PB2 as interrupt pin: to avoid RFID read
               // before the system is going to sleep again
-              PCMSK0 &= ~_BV(PCINT2);
+              SET_RESET_PCINT(false);
               break;
             }
           }
