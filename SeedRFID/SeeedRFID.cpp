@@ -62,6 +62,7 @@ SeeedRFID::SeeedRFID(int rxPin, int txPin) {
   _data.valid = false;
 
   _isAvailable = false;
+  _recvInProgress = false;
   _type = RFID_UART;
 }
 
@@ -94,9 +95,24 @@ boolean SeeedRFID::checkBitValidationUART() {
 
 boolean SeeedRFID::read() {
   _isAvailable = false;
+  byte rb;
 
-  while (_rfidIO->available()) {
-    _data.raw[_byteCounter++] = _rfidIO->read();
+  while (_rfidIO->available() > 0 && _byteCounter < DATA_MSG_SIZE) {
+    rb = _rfidIO->read();
+
+    if (_recvInProgress) {
+      _data.raw[_byteCounter++] = rb;
+
+      if (rb == END_BYTE) {
+        _recvInProgress = false;
+      }
+    }
+
+    if (rb == START_BYTE) {
+      _recvInProgress = true;
+      _byteCounter = 0;
+      _data.raw[_byteCounter++] = rb;
+    }
   }
 
   if (_byteCounter > DATA_MSG_SIZE) {

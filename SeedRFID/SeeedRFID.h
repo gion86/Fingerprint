@@ -57,6 +57,9 @@
 #define DATA_MSG_SIZE       14
 #define CARD_TAG_SIZE        5
 
+#define START_BYTE        0x02
+#define END_BYTE          0x03
+
 //#define DEBUG
 
 struct RFIDdata {
@@ -83,6 +86,7 @@ private:
   SoftwareSerial * _rfidIO; // software serial
   RFIDdata _data;
   boolean _isAvailable;
+  boolean _recvInProgress;
   RFIDType _type;
   int _byteCounter;
 
