@@ -3,7 +3,7 @@ CXX=avr-g++
 CORE_DIR=../../../Core/AttinyCore/
 PROJECT_DIR=..
 SOFTWARESERIAL_DIR=../../../Utility/SoftwareSerial/
-FPS_GT511C1R_DIR=../../FPS_GT511C1R/
+SEEED_RFID_DIR=../../SeeedRFID/
 BOUNCE2_DIR=../../../Utility/Bounce2/
 LIB_DIR=Attiny84
 
@@ -21,16 +21,17 @@ CPU_SPEED=8000000UL
 
 
 # Include (dependencies: Attiny core, FPS_GT511C1R, SoftwareSerial, Bounce2)
-INCLUDE=-I$(CORE_DIR) -I$(FPS_GT511C1R_DIR) -I$(SOFTWARESERIAL_DIR) -I$(BOUNCE2_DIR)
+INCLUDE=-I$(CORE_DIR) -I$(SEEED_RFID_DIR) -I$(SOFTWARESERIAL_DIR) -I$(BOUNCE2_DIR)
 
 # Libraries (dependencies: Attiny core, FPS_GT511C1R, SoftwareSerial, Bounce2)
 LIBS=-L$(CORE_DIR)/$(LIB_DIR) -L$(SOFTWARESERIAL_DIR)/$(LIB_DIR)\
--L$(FPS_GT511C1R_DIR)/$(LIB_DIR) -L$(BOUNCE2_DIR)/$(LIB_DIR)\
--lbounce2 -lfps_gt511c1r -lsoftwareserial -lattinycore
+-L$(SEEED_RFID_DIR)/$(LIB_DIR) -L$(BOUNCE2_DIR)/$(LIB_DIR)\
+-lbounce2 -lseeedrfid -lsoftwareserial -lattinycore
 
 # Source file and application name
 OBJ=main
-TARGET=FingerPrint
+TARGET=RFID
+EEPROM_IMAGE=../RFID.eep
 
 CFLAGS=-Wall -Wno-unused-local-typedefs -Os -fpack-struct -fshort-enums\
 -funsigned-char -funsigned-bitfields -fno-exceptions -ffunction-sections\
@@ -62,7 +63,7 @@ $(TARGET).elf: $(OBJ).o
 	
 upload:
 	@echo 'Invoking: AVRDude'
-	$(AVRDUDE) -p$(MCU) -cusbasp -Uflash:w:$(TARGET).hex:a
+	$(AVRDUDE) -p$(MCU) -cusbasp -Uflash:w:$(TARGET).hex:a -Ueeprom:w:$(EEPROM_IMAGE):a
 	@echo 'Finished building: $@'
 	@echo ' '
 	

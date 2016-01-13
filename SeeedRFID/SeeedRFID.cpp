@@ -1,52 +1,21 @@
-/*    
- * SeeedRFID.cpp
- * A library for RFID moudle.
- *   
- * Copyright (c) 2008-2014 seeed technology inc.  
- * Author      : Ye Xiaobo(yexiaobo@seeedstudio.com)
- * Create Time: 2014/2/20
+/*
+ * This file is part of RFID garage opener application.
+ * It is based on library from Ye Xiaobo(yexiaobo@seeedstudio.com),
+ * but is optimized to be used with RDM630 RFID sensor from SeeedStudio.
  *
- * The MIT License (MIT)
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
-
-/**************************************************************************
- * Pins
- * ====
- *
- * 1. VCC support 3.3 ~ 5V
- * 2. TX, RX connect to Arduino or Seeeduino
- * 3. T1, T2 is the Signal port for RFID antenna
- * 4. W0, W1 is for wiegand protocol, but this library not support yet.
- *
- * ```
- * 		+-----------+
- * 	----|VCC	  T1|----
- * 	----|GND	  T2|----
- * 	----|TX		 SER|----
- * 	----|RX		 LED|----
- * 	----|W0		BEEP|----
- * 	----|W1		 GND|----
- * 		+-----------+
- * ```
- ***************************************************************************/
 
 #include <SoftwareSerial.h>
 #include "SeeedRFID.h"
@@ -77,10 +46,10 @@ boolean SeeedRFID::checkBitValidationUART() {
     }
 
     for (int i = 1; i < _data.len - 1; ++i) {
-      // TODO comment
+      // Check if the bytes are within the admissible range:
+      // 0x30 - 0x39 : ASCII '0' - '9'
+      // 0x41 - 0x46 : ASCII 'A' - 'F'
       if (!((_data.raw[i] >= 0x30 && _data.raw[i] <= 0x39) || (_data.raw[i] >= 0x41 && _data.raw[i] <= 0x46))) {
-        Serial.print(_data.raw[i], HEX);
-        Serial.println();
         return false;
       }
     }
@@ -97,6 +66,7 @@ boolean SeeedRFID::read() {
   _isAvailable = false;
   byte rb;
 
+  // Read byte form serial until the start byte is found
   while (_rfidIO->available() > 0 && _byteCounter < DATA_MSG_SIZE) {
     rb = _rfidIO->read();
 
@@ -176,6 +146,7 @@ boolean SeeedRFID::cardNumber(byte *cardNumber) {
 
   int j = 0;
   for (int i = 1; i <= 12; ++i) {
+    // Conversion from ASCII to natural number
     if (_data.raw[i] >= 0x30 && _data.raw[i] <= 0x39) {
       buf[i] = _data.raw[i] - 0x30;
 
