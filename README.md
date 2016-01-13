@@ -22,11 +22,19 @@ The sensor is a 125Khz from SeeedStudio,
 http://www.seeedstudio.com/depot/125khz-rfid-module-uart-p-171.html?cPath=144_153
 
 which reads RFID from a 20-30 mm distance and uses a particular frame format to 
-send data to the controller. The communication is a standard TTL UART serial protocol. 
-For the ATTiny, the SoftwareSerial library has been used.
+send data to the controller. See the datasheet on the SeeedStudio site or in the doc
+folder. The communication is a standard TTL UART serial protocol, for the ATTiny 
+the SoftwareSerial library has been used.
 
-*EEPROM tag data* 
+**EEPROM tag data**
 
-TODO
+The RFID tag data are usually store in the code, but since this is a public repository,
+I don't want my tags to be out in the wild.
+So I made an Intel HEX compliant file with my data in plain ASCII text, which is not
+versioned here. This file can be loaded on the micro EEPROM memory at every programming,
+just like an EEPROM image. The AVR programmer must be configured to do that
+
+
+In the *setup()* method the micro waits for the EEPROM 
 
 Some pictures can be found at https://goo.gl/photos/i5Vk5WsfXXiouzTf6
