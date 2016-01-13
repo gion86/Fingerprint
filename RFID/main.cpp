@@ -17,7 +17,7 @@
 
 /*
  * Built for Attiny84 8Mhz, using AVR USBasp programmer.
- * VERSION 0.8.5
+ * VERSION 0.9
  */
 
 #include <Arduino.h>
