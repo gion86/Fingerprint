@@ -185,9 +185,6 @@
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
-				<externalSettings containerId="FPS_GT511C1R;de.innot.avreclipse.configuration.lib.release.106305086.668022337" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting/>
-				</externalSettings>
 				<externalSettings containerId="Bounce2;de.innot.avreclipse.configuration.lib.release.1004168755" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
 				<externalSettings containerId="SoftwareSerial;de.innot.avreclipse.configuration.lib.release.106305086.2057480405" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
 				<externalSettings containerId="AttinyCore;de.innot.avreclipse.configuration.lib.release.533789271" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>

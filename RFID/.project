@@ -6,6 +6,7 @@
 		<project>AttinyCore</project>
 		<project>Bounce2</project>
 		<project>SoftwareSerial</project>
+		<project>FPS_GT511C1R</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
