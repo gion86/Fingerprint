@@ -5,8 +5,9 @@
 	<projects>
 		<project>AttinyCore</project>
 		<project>Bounce2</project>
-		<project>SoftwareSerial</project>
 		<project>FPS_GT511C1R</project>
+		<project>SeeedRFID</project>
+		<project>SoftwareSerial</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
