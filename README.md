@@ -21,7 +21,8 @@ This branch does not require any changes on hardware or schematics.
 The sensor used in this code is a 125Khz RIFD module from SeeedStudio, 
 http://www.seeedstudio.com/depot/125khz-rfid-module-uart-p-171.html?cPath=144_153
 
-![RFID SEEEDSTUDIO](http://www.seeedstudio.com/depot/images/product/125Khz%20UART.jpg)
+![RFID SEEEDSTUDIO](Documentation/RDM630_125Khz_UART.jpg)
+
 
 which reads RFID from a 20-30 mm distance and uses a particular frame format to 
 send data to the controller. See the datasheet on the SeeedStudio site or in the doc
